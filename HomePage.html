@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF to HTML Converter</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        .window {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+        #startButton:disabled {
+            background-color: grey;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <h1>Transforme ton document PDF juridique en un document HTML interactif</h1>
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <br><br>
+        <button id="startButton" disabled>Démarrer</button>
+    </div>
+
+    <script>
+        const pdfInput = document.getElementById('pdfInput');
+        const startButton = document.getElementById('startButton');
+
+        pdfInput.addEventListener('change', function() {
+            if (pdfInput.files.length > 0) {
+                startButton.disabled = false;
+            } else {
+                startButton.disabled = true;
+            }
+        });
+
+        startButton.addEventListener('click', function() {
+            if (pdfInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('pdf', pdfInput.files[0]);
+
+                fetch('http://127.0.0.1:5000/process-pdf', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error processing PDF: ' + data.error);
+                    } else {
+                        alert('PDF processed successfully: ' + data.message);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Error processing PDF: ' + error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

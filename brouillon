@@ -1,0 +1,40 @@
+import pdfplumber
+import APIgoogle
+import Texte_TO_html
+
+
+def extraire_debut_a_fin(texte, index_debut):
+    if index_debut < len(texte):
+        return texte[index_debut:]
+    else:
+        return "Index hors des limites de la chaîne."
+
+pdf = pdfplumber.open("ToC-AI-Act-French.pdf")
+page = pdf.pages[13].extract_text()
+
+Tab_indice = []
+extrait = ""
+flag = False
+for line in page.split("\n"):
+    if (line[0].isnumeric() and len(line) > 2) or flag:
+        extrait += line + "\n"
+        if line[-1] == ".":
+            flag = False
+            Tab_indice.append(extrait)
+            extrait = ""
+        else:
+            flag = True
+
+Dic_indice = {}
+for indice in Tab_indice:
+    Dic_indice[indice[0]] = extraire_debut_a_fin(indice,2)
+
+for key in Dic_indice.keys():
+    tupl = (Dic_indice[key], APIgoogle.requetsGoogleSearch(Dic_indice[key]))
+    Dic_indice[key] = tupl
+
+
+Texte_TO_html.to_html(page,Dic_indice)
+
+
+https://eur-lex.europa.eu/search.html?scope=EURLEX&textScope0=ti&text=Directive+2016%2F97&lang=fr&type=quick&qid=1719234712539&andText0=2016%2F97&FM_CODED=DIR&DTS_SUBDOM=LEGISLATION&locale=fr
