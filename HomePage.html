@@ -24,6 +24,14 @@
             background-color: grey;
             cursor: not-allowed;
         }
+        #loadingContainer {
+            display: none;
+            margin-top: 20px;
+        }
+        progress {
+            width: 100%;
+            height: 20px;
+        }
     </style>
 </head>
 <body>
@@ -32,11 +40,20 @@
         <input type="file" id="pdfInput" accept="application/pdf" />
         <br><br>
         <button id="startButton" disabled>Démarrer</button>
+        <div id="loadingContainer">
+            <progress id="loadingProgress" value="0" max="100"></progress>
+            <p id="loadingText">Chargement en cours...</p>
+        </div>
     </div>
 
     <script>
         const pdfInput = document.getElementById('pdfInput');
         const startButton = document.getElementById('startButton');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const loadingProgress = document.getElementById('loadingProgress');
+        const loadingText = document.getElementById('loadingText');
+
+        let progressInterval;
 
         pdfInput.addEventListener('change', function() {
             if (pdfInput.files.length > 0) {
@@ -51,19 +68,41 @@
                 const formData = new FormData();
                 formData.append('pdf', pdfInput.files[0]);
 
+                // Afficher la barre de chargement
+                loadingContainer.style.display = 'block';
+
+                // Démarrer l'animation de la barre de progression
+                let progress = 0;
+                loadingProgress.value = progress;
+                progressInterval = setInterval(() => {
+                    progress = (progress + 1) % 100;
+                    loadingProgress.value = progress;
+                }, 100);
+
                 fetch('http://127.0.0.1:5000/process-pdf', {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => response.json())
                 .then(data => {
+                    // Masquer la barre de chargement et arrêter l'animation
+                    clearInterval(progressInterval);
+                    loadingContainer.style.display = 'none';
+
                     if (data.error) {
                         alert('Error processing PDF: ' + data.error);
                     } else {
                         alert('PDF processed successfully: ' + data.message);
+                        const newTabLink = document.createElement('a');
+                        newTabLink.href = `http://127.0.0.1:5000${data.html_url}`;
+                        newTabLink.target = '_blank';
+                        newTabLink.rel = 'noopener noreferrer';
+                        newTabLink.click();
                     }
                 })
                 .catch((error) => {
+                    clearInterval(progressInterval);
+                    loadingContainer.style.display = 'none';
                     console.error('Error:', error);
                     alert('Error processing PDF: ' + error);
                 });
@@ -72,3 +111,4 @@
     </script>
 </body>
 </html>
+

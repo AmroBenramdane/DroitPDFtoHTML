@@ -1,9 +1,0 @@
-sk-proj-40RDiZItA8tRFFxv2sHPT3BlbkFJY2xCuID3mUpFztDifUMx
-
-client = OpenAI(
-  organization='org-4DcMTJe2JtNJkL8gUOQq8IIA',
-  api_key="sk-proj-40RDiZItA8tRFFxv2sHPT3BlbkFJY2xCuID3mUpFztDifUMx",
-)
-
-client.chat.completions.create(model="gpt-3.5-turbo",
-                               messages=[{"role": "user", "content": "Salut tu vas bien ?"}])

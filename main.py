@@ -2,12 +2,10 @@ import sys
 
 import pdfplumber
 
-import Texte_TO_html
-from Extraction import *
+from Traitement.Extraction import *
 from tqdm import tqdm
-import warnings
-import ExtractionResolvator
-
+from Traitement import ExtractionResolvator, Texte_TO_html
+from Resolvator import ResolvatorAuto
 """
 warnings.filterwarnings("ignore")
 
@@ -49,9 +47,12 @@ if __name__ == '__main__':
     dict = {}
 
     for i in tqdm(range(0, taille), desc="Processing pages"):
-        page = createIndexDict(pdf, i, dict)
-        print(dict)
-        html_body += Texte_TO_html.Page_to_html(pdf_path, i, dict)
+        if i not in [5,6,7,8]:
+            page = createIndexDict(pdf, i, dict)
+            print(dict)
+            html_body += Texte_TO_html.Page_to_html(pdf_path, i, dict)
+        else:
+            html_body += Texte_TO_html.PageSommmaireToHTML(pdf_path, i)
 
     html_content = Texte_TO_html.finalHtml(html_body)
 
@@ -59,6 +60,9 @@ if __name__ == '__main__':
     html_output_path = pdf_path.replace('.pdf', '.html')
     with open(html_output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
+
+    ResolvatorAuto.modify_html_with_extension(html_output_path)
+    ExtractionResolvator.generateurHTML(html_output_path)
 
     print(f"HTML content saved to {html_output_path}")
 
